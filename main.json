@@ -1,0 +1,70 @@
+{
+    "variables": {
+      "owner": "",
+      "project": "",
+      "env": "",
+      "region": "",
+      "ami_name": "",
+      "ami_owners": "",
+      "instance_type": "m5.large",
+      "ssh_username": "",
+      "spot_price": "",
+      "device_name": "",
+      "volume_size": "15",
+      "volume_type": "gp2",
+      "delete_on_termination": "true"
+    },
+    "builders": [{
+      "type": "amazon-ebs",
+      "region": "{{user `region`}}",
+      "subnet_filter": {
+        "filters": {
+          "tag:Tier": "pub"
+        },
+        "most_free": true,
+        "random": false
+      },
+      "source_ami_filter": {
+        "filters": {
+          "virtualization-type": "hvm",
+          "name": "{{user `ami_name`}}",
+          "root-device-type": "ebs"
+        },
+        "owners": ["{{user `ami_owners`}}"],
+        "most_recent": true
+      },
+      "instance_type": "{{user `instance_type`}}",
+      "spot_price": "{{user `spot_price`}}",
+      "ssh_username": "{{user `ssh_username`}}",
+      "ami_name": "{{user `owner`}}-{{user `env`}}-{{user `project`}}-{{timestamp}}",
+      "launch_block_device_mappings": [
+        {
+          "device_name": "{{user `device_name`}}",
+          "volume_size": "{{user `volume_size`}}",
+          "volume_type": "{{user `volume_type`}}",
+          "delete_on_termination": "{{user `delete_on_termination`}}"
+        }
+      ],
+      "ami_block_device_mappings": [
+        {
+          "device_name": "{{user `device_name`}}",
+          "volume_size": "{{user `volume_size`}}",
+          "volume_type": "{{user `volume_type`}}",
+          "delete_on_termination": "{{user `delete_on_termination`}}"
+        }
+      ],
+      "tags": {
+        "Name": "{{user `owner`}}-{{user `env`}}-{{user `project`}}-{{timestamp}}",
+        "Owner": "{{user `owner`}}",
+        "Env": "{{user `env`}}",
+        "Project": "{{user `project`}}"
+      }
+    }],
+    "provisioners": [{
+      "type": "ansible",
+      "playbook_file": "ansible/playbook.yml",
+      "extra_arguments": [
+        "--extra-vars", "ansible_python_interpreter=/usr/bin/python3"
+      ]
+    }]
+  }

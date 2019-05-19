@@ -1,0 +1,15 @@
+---
+dist: xenial
+language: python
+python: 2.7
+sudo: required
+
+
+before_install:
+  - sudo apt-get -y update
+  - docs/install/packer.sh
+  - pip install ansible==2.7.10
+  - pip install awscli
+
+install:
+  - make build
